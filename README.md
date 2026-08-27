@@ -23,7 +23,7 @@ Peak VRAM <b>~20.3 GB</b> on a single RTX 4080 SUPER &nbsp;·&nbsp; ~388s end-to
 
 </div>
 
-This repository follows the layout of [Helios](https://github.com/PKU-YuanGroup/Helios): a root inference entry, `scripts/` for download and launch, `example/` for demo assets, and a notebook for teaching. The model is **HunyuanVideo-1.5** from Tencent. Here we package Diffusers inference and classroom notes around the **480P I2V Step-Distilled** checkpoint.
+This repository adopts the following project structure: a root inference entry, `scripts/` for download and launch, `example/` for demo assets, and a notebook for teaching. The model is **HunyuanVideo-1.5** from Tencent. Here we package Diffusers inference and classroom notes around the **480P I2V Step-Distilled** checkpoint.
 
 ## 🎬 Watch the demo
 
