@@ -1,0 +1,13 @@
+# Install PyTorch for your CUDA version first, then:
+#   pip install -r requirements.txt
+diffusers>=0.36.0
+transformers>=4.57.0
+accelerate
+sentencepiece
+huggingface-hub
+imageio
+imageio-ffmpeg
+matplotlib
+numpy
+Pillow
+kernels
