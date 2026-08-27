@@ -1,33 +1,70 @@
-# HunyuanVideo-1.5: 480P I2V Step-Distilled Classroom Repo
+<div align="center">
 
-##### Classroom Diffusers inference for Tencent HunyuanVideo-1.5 480P image-to-video, with a module-level walkthrough of Qwen2.5-VL, ByT5, SigLIP, 3D Causal VAE, 65-channel DiT input, and MeanFlow distillation.
+# HunyuanVideo-1.5
 
-[![arXiv](https://img.shields.io/badge/Paper-arXiv-b31b1b.svg)](https://arxiv.org/abs/2511.18870)
-[![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97-Hugging%20Face-yellow)](https://huggingface.co/hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_i2v_step_distilled)
-[![Official Code](https://img.shields.io/badge/Official-HunyuanVideo--1.5-blue)](https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5)
-[![Diffusers](https://img.shields.io/badge/Diffusers-Pipeline-orange)](https://huggingface.co/docs/diffusers)
-[![License](https://img.shields.io/badge/License-Apache%202.0-green.svg)](LICENSE.txt)
+### One still. Five seconds of guitar, hands, and a slow push-in.
 
-This repository follows the layout of [Helios](https://github.com/PKU-YuanGroup/Helios): a root inference entry, `scripts/` for download and launch, `example/` for demo assets, and a notebook for teaching. The model itself is **HunyuanVideo-1.5** from Tencent; this repo packages Diffusers inference and classroom notes around the **480P I2V Step-Distilled** checkpoint.
+**480P Image-to-Video · 12-step MeanFlow Distilled · Diffusers classroom repo**
+
+[![arXiv](https://img.shields.io/badge/Paper-arXiv%202511.18870-b31b1b.svg)](https://arxiv.org/abs/2511.18870)
+[![HuggingFace](https://img.shields.io/badge/%F0%9F%A4%97-Weights-yellow)](https://huggingface.co/hunyuanvideo-community/HunyuanVideo-1.5-Diffusers-480p_i2v_step_distilled)
+[![Official](https://img.shields.io/badge/Official-HunyuanVideo--1.5-1f6feb)](https://github.com/Tencent-Hunyuan/HunyuanVideo-1.5)
+[![Diffusers](https://img.shields.io/badge/Diffusers-I2V%20Pipeline-orange)](https://huggingface.co/docs/diffusers)
+[![License](https://img.shields.io/badge/Code-Apache%202.0-green.svg)](LICENSE.txt)
+
+[Demo MP4](example/hunyuan15_i2v_step12.mp4) · [Classroom notebook](notebooks/HunyuanVideo1_5_480p_I2V_StepDistilled_课堂讲解.ipynb) · [Run inference](#-inference)
+
+<img src="assets/demo.gif" width="800" alt="12-step HunyuanVideo-1.5 I2V demo: guitarist identity stays locked while hands and camera move">
+
+<p>
+<b>12 steps</b> &nbsp;·&nbsp; <b>121 frames</b> &nbsp;·&nbsp; <b>848×480 · 24 fps · 5.04s</b><br>
+Peak VRAM <b>~20.3 GB</b> on a single RTX 4080 SUPER &nbsp;·&nbsp; ~388s end-to-end
+</p>
+
+</div>
+
+This repository follows the layout of [Helios](https://github.com/PKU-YuanGroup/Helios): a root inference entry, `scripts/` for download and launch, `example/` for demo assets, and a notebook for teaching. The model is **HunyuanVideo-1.5** from Tencent. Here we package Diffusers inference and classroom notes around the **480P I2V Step-Distilled** checkpoint.
+
+## 🎬 Watch the demo
+
+The clip below is **not a cherry-picked montage**. It is the official 12-step pipeline on one first frame: identity locked, left hand walking the fretboard, right hand strumming, cloth moving, slow camera push-in.
+
+<div align="center">
+<img src="assets/keyframes.png" width="100%" alt="Six keyframes from input still to 5-second generated clip">
+</div>
+
+<br>
+
+<div align="center">
+<img src="assets/input_vs_output.png" width="100%" alt="Input still versus last generated frame">
+</div>
+
+**Prompt**
+
+> A man with short gray hair plays a red electric guitar. His hands move naturally along the strings and fretboard. Subtle body movement, realistic cloth motion, a slow camera push-in, stable identity, continuous shot, cinematic natural lighting.
+
+| Asset | Path |
+| --- | --- |
+| Looping GIF (README) | [`assets/demo.gif`](assets/demo.gif) |
+| Full MP4, 24 fps | [`example/hunyuan15_i2v_step12.mp4`](example/hunyuan15_i2v_step12.mp4) |
+| First frame | [`example/guitar-man.png`](example/guitar-man.png) |
+| Prompt file | [`example/prompt.txt`](example/prompt.txt) |
 
 ## ✨ Highlights
 
-1. **Official Diffusers I2V path.** First-frame image + text prompt → 121 frames at 848×480, 24 fps (~5s), using `HunyuanVideo15ImageToVideoPipeline`.
-2. **Step-Distilled MeanFlow in 8 or 12 steps** (4 steps is faster, slightly worse). CFG scale is 1.0; flow shift is 7. No extra CFG distillation at inference time.
-3. **Module-level classroom notebook.** Walks through Qwen2.5-VL + ByT5 text, SigLIP image tokens, 3D Causal VAE, 65-channel DiT input (`32` noise + `32` first-frame latent + `1` mask), and one DiT / scheduler step.
-4. **Consumer-GPU recipe.** Validated on a single **RTX 4080 SUPER 32GB**: CPU offload, VAE tiling/slicing, broadcast attention mask, Flash/Efficient SDPA. Peak allocated memory ~20.3GB for the 12-step official generate.
+1. **From one photo to a playable shot.** First-frame image + text → 121 frames at 848×480, 24 fps (~5s) via `HunyuanVideo15ImageToVideoPipeline`.
+2. **Step-Distilled MeanFlow in 8 or 12 steps** (4 steps is faster, slightly worse). CFG scale is 1.0; flow shift is 7.
+3. **You can see the 65-channel trick.** Noise latent (32) + first-frame latent (32) + time mask (1). The mask is `1` only on latent time 0.
+4. **Runs on a 32GB consumer GPU.** Validated on RTX 4080 SUPER: CPU offload, VAE tiling/slicing, broadcast attention mask, Flash/Efficient SDPA. Peak allocated memory ~20.3GB.
 
-## 🎬 Video Demos
-
-| First frame | 12-step I2V (~5s, 24 fps) |
-| --- | --- |
-| ![guitar-man](example/guitar-man.png) | [example/hunyuan15_i2v_step12.mp4](example/hunyuan15_i2v_step12.mp4) |
-
-Prompt is in [`example/prompt.txt`](example/prompt.txt). On RTX 4080 SUPER 32GB this sample took about **388s** end-to-end.
+<div align="center">
+<img src="assets/pipeline.png" width="100%" alt="I2V pipeline from first frame through 65-channel DiT to 121 decoded frames">
+</div>
 
 ## 📣 Latest News
 
-* `[2026.08.27]` 🔥 Release this classroom repo: Diffusers inference, Helios-style scripts, and an executed notebook on AutoDL (RTX 4080 SUPER 32GB).
+* `[2026.08.27]` 🎬 Added looping demo GIF, keyframe strip, and input-vs-output card for the README.
+* `[2026.08.27]` 🔥 Classroom repo: Diffusers inference, Helios-style scripts, executed notebook on AutoDL (RTX 4080 SUPER 32GB).
 * `[2025.12.05]` 🚀 Tencent released the [480P I2V step-distilled](https://huggingface.co/tencent/HunyuanVideo-1.5/tree/main/transformer/480p_i2v_step_distilled) checkpoint (8 or 12 steps recommended).
 
 ## 🔥 Friendly Links
@@ -84,17 +121,10 @@ Weights are large (~34GB). Keep them on a data disk if the system disk is small.
 
 ## 🚀 Inference
 
-HunyuanVideo-1.5 I2V here generates **121 frames** by default. At 24 fps that is about **5 seconds**. Official step-distilled guidance:
-
-| Model | CFG Scale | Flow Shift | Inference Steps |
-| --- | --- | --- | --- |
-| 480P I2V Step Distilled | 1 | 7 | 8 or 12 (recommended; 4 is faster) |
-
-### Run the model
+Reproduce the demo above:
 
 ```bash
-cd scripts/inference
-bash hunyuan15_i2v_step_distilled.sh
+bash scripts/inference/hunyuan15_i2v_step_distilled.sh
 ```
 
 Or from the repo root:
@@ -112,6 +142,14 @@ CUDA_VISIBLE_DEVICES=0 python infer_hunyuan.py \
   --enable_cpu_offload \
   --enable_low_vram_attn
 ```
+
+| Setting | Value |
+| --- | --- |
+| Resolution | 848×480 |
+| Frames / fps | 121 / 24 (~5.04s) |
+| Steps | 8 or **12** (4 is a speed ablation) |
+| CFG / flow shift | 1.0 / 7 |
+| Seed (this demo) | 42 |
 
 `--enable_low_vram_attn` replaces the official `[B,1,S,S]` padding mask with a broadcast `[B,1,1,S]` key-padding mask so 121-frame attention does not allocate an extra ~5GB.
 
@@ -149,11 +187,9 @@ export_to_video(video, "output.mp4", fps=24)
 
 ### ✨ Classroom Notebook
 
-The executed walkthrough is:
+The executed walkthrough is [`notebooks/HunyuanVideo1_5_480p_I2V_StepDistilled_课堂讲解.ipynb`](notebooks/HunyuanVideo1_5_480p_I2V_StepDistilled_课堂讲解.ipynb).
 
-[`notebooks/HunyuanVideo1_5_480p_I2V_StepDistilled_课堂讲解.ipynb`](notebooks/HunyuanVideo1_5_480p_I2V_StepDistilled_课堂讲解.ipynb)
-
-It loads the pipeline, generates (or reuses) the demo MP4, then inspects:
+It loads the pipeline, shows the demo MP4, then opens every module:
 
 | Module | Size | Shape / note |
 | --- | --- | --- |

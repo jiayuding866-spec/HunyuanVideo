@@ -1,5 +1,7 @@
 *.py[cod]
 *.gif
+!assets/*.gif
+!example/*.gif
 *.bmp
 *.mov
 *.mkv
